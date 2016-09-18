@@ -52,6 +52,8 @@ int main() {
 
         int new_x = (int) cur_x + x;
         int new_y = (int) cur_y + y;
+        new_x = new_x < 0 ? 0 : new_x;
+        new_y = new_y < 0 ? 0 : new_y;
 
         // Move cursor
         move = CGEventCreateMouseEvent(

@@ -50,7 +50,8 @@
           var dx = -(fist_pos[0] - pos_old[0]) / scale,
               dy =  (fist_pos[1] - pos_old[1]) / scale;
 
-          ipcRenderer.send('delta', dx, dy);
+          if (Math.abs(dx) < 300 && Math.abs(dy) < 300)
+            ipcRenderer.send('delta', dx, dy);
         }
 
         pos_old = fist_pos;
