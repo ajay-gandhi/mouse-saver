@@ -28,11 +28,11 @@ mouse.on('close', (code) => {
 
 app.on('ready', function () {
   mainWindow = new BrowserWindow({
-    width: 132,
-    height: 100,
+    width: 142,
+    height: 132,
     alwaysOnTop: true,
-    // resizable: false,
-    titleBarStyle: 'hidden',
+    resizable: false,
+    // titleBarStyle: 'hidden',
   });
   mainWindow.loadURL('file://' + __dirname + '/html/index.html');
   mainWindow.webContents.openDevTools();
