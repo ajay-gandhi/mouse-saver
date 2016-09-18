@@ -1,22 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Hand</title>
-
-  <script src="js/compatibility.js"></script>
-  <script src="js/objectdetect.js"></script>
-  <script src="js/objectdetect.handfist.js"></script>
-  <script src="js/objectdetect.handopen.js"></script>
+  <title>Mouse Saver</title>
   <script src="https://trackingjs.com/bower/tracking.js/build/tracking-min.js"></script>
   <script>
   const {ipcRenderer} = require('electron');
 
   window.onload = function () {
-
     var canvas  = document.getElementById('canvas'),
         context = canvas.getContext('2d'),
         span    = document.getElementById('which'),
-        body    = document.getElementById('body'),
         video   = document.getElementById('video');
 
     var pos_old = false,
@@ -29,9 +22,10 @@
     tracking.track('#video', tracker, { camera: true });
     context.translate(canvas.width, 0);
     context.scale(-1, 1);
+
     tracker.on('track', function (event) {
       context.clearRect(0, 0, canvas.width, canvas.height);
-      event.data.forEach(function(rect) {
+      event.data.forEach(function (rect) {
         if (rect.color === 'custom') {
           rect.color = tracker.customColor;
         }
@@ -44,7 +38,6 @@
         context.fillText('y: ' + rect.y + 'px', rect.x + rect.width + 5, rect.y + 22);
         context.fillText('w: ' + rect.width  + 'px', rect.x + rect.width + 5, rect.y + 33);
         context.fillText('h: ' + rect.height + 'px', rect.x + rect.width + 5, rect.y + 44);
-
 
         if (!rectold) rectold = rect;
 
@@ -79,8 +72,7 @@
   }
   </style>
 </head>
-
-<body id="body">
+<body>
   <video id="video" width="600" height="450" preload autoplay loop muted></video>
   <canvas id="canvas" width="600" height="450"></canvas>
 </body>

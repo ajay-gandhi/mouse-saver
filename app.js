@@ -12,7 +12,6 @@ var mainWindow;
 
 /******************************** Mouse Mover *********************************/
 
-// Initialize mouse mover
 const mouse = spawn('./mouse');
 mouse.stdin.setEncoding('utf-8');
 
@@ -31,8 +30,7 @@ app.on('ready', function () {
     width: 142,
     height: 132,
     alwaysOnTop: true,
-    resizable: false,
-    // titleBarStyle: 'hidden',
+    resizable: false
   });
   mainWindow.loadURL('file://' + __dirname + '/html/index.html');
   mainWindow.webContents.openDevTools();
@@ -49,14 +47,8 @@ app.on('before-quit', function () {
   dash.kill('SIGINT');
 });
 
-// Send updates to cursor
 ipcMain.on('delta', (event, dx, dy) => {
   mouse.stdin.write(dx + ',' + dy + '\n');
-});
-
-// Received click
-ipcMain.on('click', (event, down) => {
-  mouse.stdin.write((down ? 'd' : 'u') + '\n');
 });
 
 /******************************** Sound Clicks ********************************/

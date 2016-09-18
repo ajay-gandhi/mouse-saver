@@ -1,6 +1,6 @@
 # Mouse saver
 
-> Save your mouse. Control without touching it.
+> Save your mouse - control your computer without touching it.
 
 ## Development
 
