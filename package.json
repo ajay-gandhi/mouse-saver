@@ -1,0 +1,12 @@
+{
+  "name": "hand",
+  "version": "0.0.1",
+  "description": "Control your computer using just your hands",
+  "main": "app.js",
+  "scripts": {
+    "test": "npm start",
+    "start": "electron ."
+  },
+  "author": "Ajay Gandhi",
+  "license": "ISC"
+}
