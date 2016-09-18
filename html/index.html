@@ -15,8 +15,8 @@
 
     var canvas  = document.getElementById('canvas'),
         context = canvas.getContext('2d'),
-        video   = document.createElement('video'),
-        detector;
+        span    = document.getElementById('which'),
+        video   = document.createElement('video');
 
     try {
       compatibility.getUserMedia({ video: true }, function (stream) {
@@ -33,8 +33,10 @@
       console.log(error);
     }
 
-    var fist_pos_old = false;
-    var open_detector, fist_detector;
+    var pos_old = false,
+        mouse_is_down = false,
+        open_detector,
+        fist_detector;
 
     var play = function () {
       compatibility.requestAnimationFrame(play);
@@ -48,40 +50,50 @@
       if (video.readyState === video.HAVE_ENOUGH_DATA && video.videoWidth > 0) {
 
         // Prepare the detectors once the video dimensions are known:
-        if (!detector) {
-          var width = ~~(140 * video.videoWidth / video.videoHeight);
-          var height = 140;
-              detector = new objectdetect.detector(width, height, 1.1, objectdetect.handfist);
+        if (!fist_detector) {
+          var width = ~~(140 * video.videoWidth / video.videoHeight),
+              height = 140;
+
+          open_detector = new objectdetect.detector(width, height, 1.1, objectdetect.handopen);
+          fist_detector = new objectdetect.detector(width, height, 1.1, objectdetect.handfist);
         }
 
         // Perform the actual detection
-        var coords = detector.detect(video, 1);
+        var fist_coords = fist_detector.detect(video, 1),
+            open_coords = open_detector.detect(video, 1);
 
-        if (coords[0]) {
-          var coord = coords[0];
+        var coord = fist_coords[0] || open_coords[0];
+
+        if (coord) {
+          var click = fist_coords.length == 0;
 
           // Rescale coordinates from detector to video coordinate space:
-          coord[0] *= video.videoWidth  / detector.canvas.width;
-          coord[1] *= video.videoHeight / detector.canvas.height;
-          coord[2] *= video.videoWidth  / detector.canvas.width;
-          coord[3] *= video.videoHeight / detector.canvas.height;
+          coord[0] *= video.videoWidth  / fist_detector.canvas.width;
+          coord[1] *= video.videoHeight / fist_detector.canvas.height;
+          coord[2] *= video.videoWidth  / fist_detector.canvas.width;
+          coord[3] *= video.videoHeight / fist_detector.canvas.height;
 
           var fist_pos = [coord[0] + coord[2] / 2, coord[1] + coord[3] / 2];
 
-          if (fist_pos_old) {
-            var dx = (fist_pos[0] - fist_pos_old[0]) / video.videoWidth,
-                dy = (fist_pos[1] - fist_pos_old[1]) / video.videoHeight;
+          if (pos_old) {
+            var dx = (fist_pos[0] - pos_old[0]) / video.videoWidth,
+                dy = (fist_pos[1] - pos_old[1]) / video.videoHeight;
 
             // Send changes to backend if not huge
-            if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1)
-              ipcRenderer.send('delta', dx, dy);
+            if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1) {
+              if (click != mouse_is_down) ipcRenderer.send('click', click);
+              if (click == false) ipcRenderer.send('delta', dx, dy);
+            }
           }
-          fist_pos_old = fist_pos;
+          mouse_is_down = click;
+          pos_old = fist_pos;
+
+          span.innerHTML = mouse_is_down ? 'down' : 'up';
 
           // Draw coordinates on video overlay:
           context.beginPath();
           context.lineWidth = '2';
-          context.fillStyle = fist_pos_old ? 'rgba(0, 255, 255, 0.5)' : 'rgba(255, 0, 0, 0.5)';
+          context.fillStyle = pos_old ? 'rgba(0, 255, 255, 0.5)' : 'rgba(255, 0, 0, 0.5)';
           context.fillRect(
             coord[0] / video.videoWidth * canvas.clientWidth,
             coord[1] / video.videoHeight * canvas.clientHeight,
@@ -90,16 +102,20 @@
           );
           context.stroke();
         } else {
-          fist_pos_old = false;
+          pos_old = false;
         }
       }
     }
-  };
+  }
   </script>
 </head>
 
 <body>
   <h1>Gesture Control</h1>
+  <br />
+  <span id="which">hi</span><br />
+  <br />
+  <input type="checkbox" style="transform:scale(5)" />
   <canvas id='canvas' style="position: fixed; z-index: 1001; top: 10px; right: 10px; opacity: 0.9">
 </body>
 </html>

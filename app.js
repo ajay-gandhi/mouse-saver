@@ -44,3 +44,8 @@ app.on('before-quit', function () {
 ipcMain.on('delta', (event, dx, dy) => {
   mouse.stdin.write((dx * -500) + ',' + (dy * 500) + '\n');
 });
+
+// Received click
+ipcMain.on('click', (event, down) => {
+  mouse.stdin.write((down ? 'd' : 'u') + '\n');
+});
