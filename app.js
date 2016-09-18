@@ -68,7 +68,6 @@ snapDet.onClap(function() {
 
 /***************************** Dash Button Clicks *****************************/
 
-// Initialize mouse mover
 const dash = spawn('sudo', ['node', 'dash_server.js']);
 
 dash.stdout.on('data', (data) => {
