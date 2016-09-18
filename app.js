@@ -25,7 +25,13 @@ mouse.on('close', (code) => {
 /************************************ App *************************************/
 
 app.on('ready', function () {
-  mainWindow = new BrowserWindow({ width: 800, height: 600 });
+  mainWindow = new BrowserWindow({
+    width: 132,
+    height: 100,
+    alwaysOnTop: true,
+    // resizable: false,
+    titleBarStyle: 'hidden',
+  });
   mainWindow.loadURL('file://' + __dirname + '/html/index.html');
   mainWindow.webContents.openDevTools();
 });
@@ -42,7 +48,7 @@ app.on('before-quit', function () {
 
 // Send updates to cursor
 ipcMain.on('delta', (event, dx, dy) => {
-  mouse.stdin.write((dx * -500) + ',' + (dy * 500) + '\n');
+  mouse.stdin.write(dx + ',' + dy + '\n');
 });
 
 // Received click
