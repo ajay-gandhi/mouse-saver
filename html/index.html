@@ -39,22 +39,24 @@
         context.fillText('w: ' + rect.width  + 'px', rect.x + rect.width + 5, rect.y + 33);
         context.fillText('h: ' + rect.height + 'px', rect.x + rect.width + 5, rect.y + 44);
 
+        // Smoothing
         if (!rectold) rectold = rect;
 
-        var fist_pos = [(rect.x + rectold.x) / 4, (rect.y + rectold.y) / 4];
+        var pos = [(rect.x + rectold.x) / 4, (rect.y + rectold.y) / 4];
         var scale = rect.width / (200);
 
         rectold = rect;
         
         if (pos_old) {
-          var dx = -(fist_pos[0] - pos_old[0]) / scale,
-              dy =  (fist_pos[1] - pos_old[1]) / scale;
+          // Compute diffs
+          var dx = -(pos[0] - pos_old[0]) / scale,
+              dy =  (pos[1] - pos_old[1]) / scale;
 
           if (Math.abs(dx) < 200 && Math.abs(dy) < 200)
             ipcRenderer.send('delta', dx, dy);
         }
 
-        pos_old = fist_pos;
+        pos_old = pos;
 
       });
     });
