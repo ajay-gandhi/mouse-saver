@@ -3,12 +3,13 @@
 const snapDet     = require('clap-detector');
 const spawn       = require('child_process').spawn;
 const electron    = require('electron');
+const PowerState  = require('./power_state');
 
 const app           = electron.app;
 const BrowserWindow = electron.BrowserWindow;
 const ipcMain       = electron.ipcMain;
 
-var mainWindow;
+var mainWindow, stayAlive = false;
 
 /******************************** Mouse Mover *********************************/
 
@@ -19,32 +20,42 @@ mouse.stderr.on('data', (data) => {
   console.error('Error in mouse mover:', data);
 });
 
-mouse.on('close', (code) => {
-  console.log('Mouse mover exited with code:', code);
-});
-
 /************************************ App *************************************/
 
-app.on('ready', function () {
+var initialize = function () {
+  stayAlive = false;
+
+  // Get screen size
+  const scr_size    = electron.screen.getPrimaryDisplay().workAreaSize;
+  const scr_width   = scr_size.width;
+  const scr_height  = scr_size.height;
+  const this_width  = 150;
+  const this_height = 113;
+
   mainWindow = new BrowserWindow({
-    width: 142,
-    height: 132,
+    width: this_width,
+    height: this_height,
+    x: scr_width - this_width - 20,
+    y: scr_height - this_height - 0,
     alwaysOnTop: true,
-    resizable: false
+    resizable: false,
+    titleBarStyle: 'hidden'
   });
   mainWindow.loadURL('file://' + __dirname + '/html/index.html');
-  mainWindow.webContents.openDevTools();
-});
+}
+
+app.on('ready', initialize);
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
-  app.quit();
+  if (!stayAlive) app.quit();
 });
 
 // Quit child process before quitting
 app.on('before-quit', function () {
-  mouse.kill('SIGINT');
-  dash.kill('SIGINT');
+  mouse.kill();
+  // Can't kill directly because sudo
+  dash.stdin.write('die\n');
 });
 
 ipcMain.on('delta', (event, dx, dy) => {
@@ -59,7 +70,7 @@ var snap_config = {
 
 snapDet.start(snap_config);
 
-snapDet.onClap(function() {
+snapDet.onClap(function () {
   mouse.stdin.write('d\n');
   mouse.stdin.write('u\n');
 });
@@ -67,12 +78,24 @@ snapDet.onClap(function() {
 /***************************** Dash Button Clicks *****************************/
 
 const dash = spawn('sudo', ['node', 'dash_server.js']);
+const p    = new PowerState('ajaj');
 
+dash.stdin.setEncoding('utf-8');
 dash.stdout.on('data', (data) => {
-  mouse.stdin.write('d\n');
-  mouse.stdin.write('u\n');
-});
+  p.state(function (s) {
+    // Asleep, wake up
+    if (s == 1) {
+      p.unlock();
 
-dash.on('close', (code) => {
-  console.log('Dash button exited with code:', code);
+    } else {
+      // Toggle
+      if (mainWindow == null) {
+        initialize();
+      } else {
+        stayAlive = true;
+        mainWindow.close();
+        mainWindow = null;
+      }
+    }
+  });
 });
