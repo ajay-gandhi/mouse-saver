@@ -2,6 +2,10 @@
 
 > Save your mouse - control your computer without touching it.
 
+## Todo
+
+Add calibration for scaling constants in `index.html`.
+
 ## Development
 
 Clone the repo, install node modules:

@@ -19,14 +19,17 @@ int main() {
     if (getline(&line, &size, stdin) == -1) {
       printf("No line\n");
     } else {
-      current_mouse = CGEventCreate(NULL);
-      CGPoint cursor = CGEventGetLocation(current_mouse);
-      CFRelease(current_mouse);
 
-      int cur_x = (int) cursor.x;
-      int cur_y = (int) cursor.y;
-
+      // Normally I don't like copying code but we wanna
+      // make this section as fast as possible.
       if (line[0] == 'd') {
+        current_mouse = CGEventCreate(NULL);
+        CGPoint cursor = CGEventGetLocation(current_mouse);
+        CFRelease(current_mouse);
+
+        int cur_x = (int) cursor.x;
+        int cur_y = (int) cursor.y;
+
         move = CGEventCreateMouseEvent(
             NULL,
             kCGEventLeftMouseDown,
@@ -35,6 +38,13 @@ int main() {
         );
 
       } else if (line[0] == 'u') {
+        current_mouse = CGEventCreate(NULL);
+        CGPoint cursor = CGEventGetLocation(current_mouse);
+        CFRelease(current_mouse);
+
+        int cur_x = (int) cursor.x;
+        int cur_y = (int) cursor.y;
+
         move = CGEventCreateMouseEvent(
             NULL,
             kCGEventLeftMouseUp,
@@ -46,14 +56,9 @@ int main() {
 
         // Parse command
         char* comma = strchr(line, ',');
-        int y = atoi(comma + 1);
+        int new_y = atoi(comma + 1);
         *comma = 0;
-        int x = atoi(line);
-
-        int new_x = (int) cur_x + x;
-        int new_y = (int) cur_y + y;
-        new_x = new_x < 0 ? 0 : new_x;
-        new_y = new_y < 0 ? 0 : new_y;
+        int new_x = atoi(line);
 
         // Move cursor
         move = CGEventCreateMouseEvent(

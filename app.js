@@ -22,15 +22,21 @@ mouse.stderr.on('data', (data) => {
 
 /************************************ App *************************************/
 
+// Get screen size
+var scr_width;
+var scr_height;
+
 var initialize = function () {
   stayAlive = false;
 
-  // Get screen size
-  const scr_size    = electron.screen.getPrimaryDisplay().workAreaSize;
-  const scr_width   = scr_size.width;
-  const scr_height  = scr_size.height;
+  const scr_size = electron.screen.getPrimaryDisplay().workAreaSize;
+  scr_width  = scr_size.width;
+  scr_height = scr_size.height;
+
+  // const this_width  = 150;
+  // const this_height = 113;
   const this_width  = 150;
-  const this_height = 113;
+  const this_height = 112;
 
   mainWindow = new BrowserWindow({
     width: this_width,
@@ -58,8 +64,8 @@ app.on('before-quit', function () {
   dash.stdin.write('die\n');
 });
 
-ipcMain.on('delta', (event, dx, dy) => {
-  mouse.stdin.write(dx + ',' + dy + '\n');
+ipcMain.on('position', (event, x, y) => {
+  mouse.stdin.write(Math.floor(scr_width * x) + ',' + Math.floor(scr_height * y) + '\n');
 });
 
 /******************************** Sound Clicks ********************************/
